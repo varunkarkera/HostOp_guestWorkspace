@@ -11,7 +11,7 @@ try {
   await page.getByText("A thoughtful first draft", { exact: true }).waitFor();
   const screenshot = async (name: string) => {
     await page.locator("img").evaluateAll(async (images) => {
-      await Promise.all(images.map((image) => image.decode().catch(() => undefined)));
+      await Promise.all(images.map((image) => image instanceof HTMLImageElement ? image.decode().catch(() => undefined) : undefined));
     });
     await page.screenshot({ path: resolve(directory, name), fullPage: true, animations: "disabled", style: "nextjs-portal { display: none !important; }" });
     console.log(`Saved ${name}`);
