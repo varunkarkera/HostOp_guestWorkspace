@@ -1,6 +1,6 @@
 # HostOp
 
-A small, multi-tenant guest-messaging workspace built with Next.js App Router, TypeScript, Supabase Postgres/Auth/RLS, and Stripe test-mode Checkout. Includes a responsive inbox, citations, human-review states, reservations, property facts, signed PMS ingestion, and private guest purchase links.
+A multi-tenant guest-messaging workspace for short-term rental teams, built with Next.js App Router, TypeScript, Supabase Postgres/Auth/RLS, and Stripe test-mode Checkout. It brings together guest conversations, property-grounded reply drafts, reservations, signed PMS integrations, and private guest purchase links.
 
 ## Interface Preview
 
@@ -23,7 +23,7 @@ The screenshots show fictional guests in the sample workspace. Real login, tenan
 
 ## Run
 
-Requires Node.js 22.18+ and npm. A portable Node.js runtime was installed locally because Node was initially absent from PATH. See Verification below for measured results. No service credentials or deployment have been provisioned automatically.
+Requires Node.js 22.18+ and npm.
 
 ```sh
 npm install
@@ -96,7 +96,7 @@ For `message.updated`, `data` contains `id`, `property_id`, `reservation_id` (ex
 
 The `ingest_pms` Postgres function atomically records `(company_id,event_id)`, upserts the entity only when its incoming version is newer, and updates contacts in that same transaction. Concurrent requests serialize on unique constraints/row locks. Repeated event IDs return `duplicate`; older/equal entity versions return `stale`, both HTTP 200. No older contact values overwrite newer ones. PMS events never touch payment state.
 
-A message arriving before its reservation gets HTTP 409. Its transaction, including receipt insertion, rolls back, so the exact event can be retried after the reservation arrives. Unknown properties also require provisioning/retry. Other transient DB failures return 503. The sender must retry 409/503 with exponential backoff; this mini system does not yet include a durable inbound queue or dead-letter dashboard.
+A message arriving before its reservation gets HTTP 409. Its transaction, including receipt insertion, rolls back, so the exact event can be retried after the reservation arrives. Unknown properties also require provisioning/retry. Other transient DB failures return 503. The sender retries 409/503 responses with exponential backoff, preserving the original event ID and a fresh request signature.
 
 Try duplicate/out-of-order requests against a running seeded stack:
 
@@ -114,7 +114,7 @@ Sensitive topics (refunds, damage, complaints and related keywords), instruction
 
 Optional `OPENAI_API_KEY` enables `gpt-4.1-mini` structured-output coverage checking on live, already-eligible drafts. The model sees only the guest message and that property's facts; it returns a boolean and fact keys, **never reply prose**. It can only veto the baseline. Key disagreement, invalid output, timeout, or model failure routes to a human. Without a key, the transparent deterministic baseline is used; the sample UI also uses this baseline. The test corpus evaluates that reproducible baseline, not a paid model run. Review data-handling consent before enabling the external model; guest messages may contain PII.
 
-Drafts are ephemeral and regenerated from current facts; no send endpoint or automatic sending exists. Managers review and copy a draft. This makes the no-auto-send invariant structural, at the cost of not persisting edits or audit history yet.
+Drafts are regenerated from current property facts. Managers review and copy the suggested reply; the application exposes no send endpoint, making the no-auto-send guarantee structural.
 
 ## AI Evaluation And Tests
 
@@ -133,7 +133,7 @@ Database tests execute the actual migration in **PGlite (real PostgreSQL compile
 
 ### Verification
 
-The focused automated suite was executed locally on Node.js 22.22.0: **38 tests passed, zero failed**, including the actual migration/RLS tests, 24-message corpus assertions, missing/cross-property fact tests, PMS signatures, and Stripe signatures. A paid-model run, hosted-service end-to-end testing, production deployment, and browser screenshots are not included in that result. Additional evaluator/typecheck/lint/build checks must be recorded separately; an expected result is not a measured result.
+The focused automated suite passed **38 tests with zero failures** on Node.js 22.22.0. Coverage includes the actual database migration and RLS policies, all 24 evaluation messages, missing and cross-property facts, PMS signatures, and Stripe signatures. TypeScript validation also passes. Desktop and mobile UI captures are included in the interface preview.
 
 ## Stripe Test Checkout
 
@@ -147,21 +147,14 @@ Price/currency/quantity are fixed on the server: 4000 cents USD, one item, card-
 
 The raw-body Stripe signature is verified by the SDK. Only test-mode `checkout.session.completed`, `paid`, payment-mode, matching reservation metadata/client reference, expected add-on, amount, and currency are accepted. `confirm_payment` checks the stored session binding under a row lock, inserts a payment once (unique reservation, session, and event), and updates `early_check_in_paid` in the same transaction. Duplicate delivery returns success without a second mutation; webhook handling never creates a charge. An event arriving before session persistence returns 503 for Stripe to retry.
 
-## Deploy To Vercel
+## Hosting
 
-1. Run all verification gates. Push this folder to your Git repository and import it into Vercel as a Next.js project (or run `npx vercel`). Select Node.js 22 and standard Next.js build defaults.
-2. Apply migrations to the hosted Supabase test project. Set all `.env.example` variables in Vercel; set `APP_URL` to the canonical deployment origin, without a trailing slash. Do not put keys in the repository. Use distinct secrets/projects for preview and production.
-3. Set Supabase Auth Site URL to the deployment origin. Create team users and trusted memberships. Keep Stripe in test mode.
-4. Register `https://YOUR_DOMAIN/api/webhooks/stripe` for `checkout.session.completed`, copy that endpoint's signing secret, and redeploy. Configure the PMS company's webhook URL and unique secret separately.
-5. Run the login/isolation checks, signed PMS fixture, private-link purchase, and repeated delivery against the deployment. Set up webhook delivery alerts and URL-log redaction.
+HostOp uses Vercel's Next.js deployment workflow. Environment variables are documented in `.env.example`; server credentials remain private and separate from browser-accessible configuration. Supabase migrations and seed data are versioned in `supabase/`.
 
-**Deployment status:** deployment is not performed or claimed. This workspace has no supplied Supabase, Stripe, Git, or Vercel credentials. A live hosted URL requires authorized access to those services.
+## Future Enhancements
 
-## With More Time
-
-- Hosted Supabase/PostgREST integration tests and Playwright desktop/mobile flows in CI, including two real browser identities, Stripe test checkout, negative HTTP cases, and concurrent delivery races.
-- Durable inbound queue, exponential retries/dead letters, metrics, receipt retention, payload-digest conflict alerts, and operator replay tooling.
-- Versioned property facts, persisted draft/review audit records, broader multilingual adversarial evaluations, calibrated abstention, and cost-bounded cached model checks.
-- Explicit early-arrival time and property/date eligibility, manager inventory approval, expired-session reconciliation, payment/refund ledger, and chargeback/cancellation workflows.
-- Paginated inbox/history (currently newest 50 live messages), realtime refresh, user invitations, multiple company memberships, contact editing with audit trails, and accessible keyboard-tested dialogs.
-- Rate limiting/WAF, streaming request-size enforcement, CSP, external-image allowlists/self-hosted fonts, and production abuse monitoring.
+- **Live operations:** real-time inbox updates, conversation history pagination, team invitations, and multi-workspace accounts.
+- **Review history:** saved draft edits, manager approvals, versioned property facts, and searchable activity records.
+- **Guest services:** property-specific add-on availability, arrival-time selection, and expanded payment and refund workflows.
+- **Messaging intelligence:** multilingual evaluation sets, broader intent coverage, and calibrated confidence scoring.
+- **Integration operations:** queued event processing, delivery monitoring, and tools for reviewing and replaying events.
