@@ -1,0 +1,42 @@
+{
+  "name": "hostop",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev --hostname 127.0.0.1",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test tests/*.test.ts",
+    "eval:ai": "tsx scripts/evaluate.ts",
+    "test:db": "tsx --test tests/database.test.ts",
+    "provision": "tsx --env-file=.env.local scripts/provision.ts",
+    "guest-link": "tsx --env-file=.env.local scripts/guest-link.ts",
+    "capture:ui": "tsx scripts/capture-ui.ts"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.8.0",
+    "@supabase/supabase-js": "^2.95.0",
+    "lucide-react": "^0.468.0",
+    "next": "^16.1.6",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "server-only": "^0.0.1",
+    "stripe": "^20.3.0",
+    "zod": "^4.3.0"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.3.14",
+    "@eslint/eslintrc": "^3.2.0",
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "eslint": "^9.39.0",
+    "eslint-config-next": "^16.1.6",
+    "playwright": "^1.65.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.0"
+  }
+}

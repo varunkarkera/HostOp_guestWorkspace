@@ -1,0 +1,137 @@
+HOSTOP - WHAT TO SAY WHILE RECORDING
+==================================
+
+BEFORE YOU START
+Open http://127.0.0.1:3000 and maximize the browser.
+Choose Juniper Stays and Manager in the bottom-left controls.
+In Notepad, turn on Word Wrap so each paragraph fits your window.
+
+Read the paragraphs under SAY. Do not read the CLICK directions aloud.
+Follow the left menu in order: Inbox, Reservations, Properties, Integrations.
+
+
+1. INBOX
+--------
+
+CLICK: Inbox in the left menu.
+
+SAY:
+Hi, this is HostOp. It helps rental teams manage guest messages and prepare replies to common questions. I'll start with the inbox, then show reservations, properties, and integrations.
+
+I'm using sample data for this walkthrough. There are six guest conversations here. Four have suggested replies ready for review, and two need someone from the team to respond personally.
+
+
+CLICK: Emma Thompson, the first conversation.
+LOOK AT: Her message and the suggested reply on the right.
+
+SAY:
+Let's open Emma's message. She's asking for the Wi-Fi password. Since she's staying at Juniper House, the app uses the Wi-Fi name and password saved for that house to prepare a reply.
+
+Below the reply, the Wi-Fi label shows where that information came from. The same Wi-Fi details are listed under Good to know, so the manager can check the answer before using it. The app isn't guessing a password or taking one from a different property.
+
+The High confidence label means the information needed to answer this question is available. The manager still reviews the reply.
+
+
+CLICK: Copy draft at the bottom-right of the suggested reply.
+
+SAY:
+Once the manager is happy with the wording, they can copy the reply. This does not send anything to the guest. The app never sends these drafts automatically.
+
+
+CLICK: James Miller, the second conversation.
+
+SAY:
+Now let's look at James. He wants to arrive around noon and asks whether he can check in early. The app knows the normal check-in time, but it doesn't know whether the house will be ready at noon. Instead of saying yes, it asks a person to handle the request.
+
+
+CLICK: Daniel Kim, the fourth conversation.
+
+SAY:
+Daniel is reporting that the apartment is dirty. This is a complaint, so the app does not write a routine reply. It leaves the response to the manager. Refund requests and reports of damage are handled the same way.
+
+
+CLICK: Needs a human above the conversation list, then Draft ready.
+FINISH ON: All messages.
+
+SAY:
+These tabs help the manager decide what to work on next. Needs a human shows the messages that require a personal response. Draft ready shows the replies waiting to be checked. The search box and property filter make it easier to find a particular guest or listing.
+
+
+2. RESERVATIONS
+---------------
+
+CLICK: Reservations, the next option in the left menu.
+
+SAY:
+Next is Reservations. This shows who is staying, which property they booked, and when they arrive and leave. It also shows the booking status and whether early check-in has been paid for.
+
+The team can use this page to check the details of a stay without searching through guest messages.
+
+
+3. PROPERTIES
+-------------
+
+CLICK: Properties, the next option in the left menu.
+LOOK AT: The check-in, Wi-Fi, parking, and house rules for each property.
+
+SAY:
+Here are the properties. Each one has its own check-in time, Wi-Fi details, parking instructions, and house rules.
+
+This is the information the app uses when it prepares a reply. For example, a guest staying at Casa Sol should get Casa Sol's Wi-Fi details, not the password for Juniper House. If the saved information doesn't answer the question, the app leaves it for a person.
+
+
+4. INTEGRATIONS
+---------------
+
+CLICK: Integrations, the next option in the left menu.
+LOOK AT: The three services, from top to bottom.
+
+SAY:
+This page shows the services involved behind the scenes. They are not connected in this sample workspace, so I'll explain how the implemented flows work.
+
+First is the property management system, which sends booking and message updates. The app checks a digital signature to verify the sender. If the same update arrives twice, it is only applied once. If an older update arrives late, it cannot replace newer information.
+
+Next is Stripe. A guest can use a private link to buy early check-in for forty dollars through Stripe's test checkout. The reservation is only updated after Stripe confirms that the payment succeeded. Just opening the success page is not enough. If Stripe sends the same confirmation again, the app does not record another purchase or make another charge.
+
+Finally, Supabase handles login and stores the data. Its database rules control which company and which guest information each user can access.
+
+
+5. COMPANY AND ROLE VIEWS
+-------------------------
+
+FIND: Sample workspace near the bottom of the left menu.
+CHANGE: Company to Shore & Stay.
+CLICK: Reservations in the left menu.
+
+SAY:
+I'll now switch the sample company to Shore and Stay. You can see that the guests and properties have changed.
+
+This dropdown is just a way to demonstrate the different views. With real accounts, the company comes from the user's assigned membership, and the database blocks access to the other company's records.
+
+
+CHANGE: Role to Cleaner in the bottom-left controls.
+
+SAY:
+Now I'll switch to the Cleaner view. The inbox is no longer available, and guest phone numbers and email addresses are not shown.
+
+With real accounts, Cleaners can only see confirmed stays happening today, including arrivals and departures. They also cannot read guest messages, because a guest might have included private contact details in a message.
+
+
+6. CLOSE
+--------
+
+LEAVE: The Cleaner reservations view on screen.
+
+SAY:
+To check the main behavior, I ran the local automated tests. All thirty-eight passed. They cover company separation, Cleaner access, duplicate and older updates, signature checks, and repeated payment confirmations. The database access tests check the actual rules, not just what is hidden on screen.
+
+The idea is to save time on straightforward questions without letting the app make promises it cannot support. It helps the team prepare an answer when the information is available and brings in a person when it isn't.
+
+
+PRIVATE REMINDERS - DO NOT READ ALOUD
+------------------------------------
+
+- This is a local sample demo, not a live Vercel deployment.
+- The sample selectors demonstrate views. They do not prove security.
+- Real login and payment testing need Supabase and Stripe configuration.
+- Do not show passwords, secret keys, or private guest-link tokens.

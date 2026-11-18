@@ -1,0 +1,2 @@
+"use client";
+export default function ErrorPage({ reset }: { reset: () => void }) { return <main className="standalone"><h1>A brief interruption.</h1><p>We couldn&apos;t load your workspace. Your data hasn&apos;t changed.</p><button className="primary-button" onClick={reset} style={{ marginTop: 24 }}>Try again</button></main>; }

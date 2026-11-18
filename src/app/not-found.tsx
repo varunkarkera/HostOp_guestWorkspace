@@ -1,0 +1,2 @@
+import Link from "next/link";
+export default function NotFound() { return <main className="standalone"><h1>This link has checked out.</h1><p>The page or private reservation link is unavailable or has expired. Contact your host for help.</p><Link className="primary-button" href="/" style={{ marginTop: 24 }}>Back to workspace</Link></main>; }
